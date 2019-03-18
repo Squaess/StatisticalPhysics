@@ -1,18 +1,21 @@
       integer d,N,step,x,K,i,j
       real xNa, xNa2, u
 c ilosc krokow dla jednego pijaka
-      integer, dimension(10) :: nu
-      nu(1) = 10000
-      nu(1) = 10
-      nu(2) = 21.5443469
-      nu(3) = 46.41588834
-      nu(4) = 100.
-      nu(5) = 215.443469
-      nu(6) = 464.15888336
-      nu(7) = 1000.
-      nu(8) = 2154.43469003
-      nu(9) = 4641.58883361
-      nu(10) = 10000.
+      integer, dimension(1000) :: nu
+    !   nu(1) = 10
+    !   nu(2) = 21.5443469
+    !   nu(3) = 46.41588834
+    !   nu(4) = 100.
+    !   nu(5) = 215.443469
+    !   nu(6) = 464.15888336
+    !   nu(7) = 1000.
+    !   nu(8) = 2154.43469003
+    !   nu(9) = 4641.58883361
+    !   nu(10) = 10000.
+
+      do j=1,size(nu)
+        nu(j) = j
+      enddo
 c ilosc pijakow
       K = 30000
       open(1, file='data.txt')

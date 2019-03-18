@@ -35,7 +35,8 @@ def run_numba(steps_array):
 
     return ret_array
 
-steps_array = np.logspace(1.0, 4.0, 10)
+# steps_array = np.logspace(1.0, 4.0, 10)
+steps_array = np.arange(1, 1001)
 print(steps_array)
 start = time.time()
 ret = run_numba(steps_array)

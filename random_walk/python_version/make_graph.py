@@ -5,7 +5,7 @@ from sklearn.linear_model import LinearRegression
 
 graph = []
 
-with open('random_walk/some_tests/data.txt') as f:
+with open('random_walk/python_version/data.csv') as f:
     csv_reader = csv.reader(f, delimiter=",")
     for row in csv_reader:
         graph.append([float(row[0]), float(row[1])])
