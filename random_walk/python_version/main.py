@@ -6,10 +6,8 @@ import time
 def run_numba(steps_array):
 
     ret_array = np.zeros((steps_array.shape[0],2), dtype=np.double)
-
     # ilosc pijakow
     K = np.int(30000)
-
     x = 0
     xNa = 0.
     xN2a = 0.
@@ -35,8 +33,8 @@ def run_numba(steps_array):
 
     return ret_array
 
-# steps_array = np.logspace(1.0, 4.0, 10)
-steps_array = np.arange(1, 1001)
+steps_array = np.logspace(1.0, 4.0, 10)
+# steps_array = np.arange(1, 1001)
 print(steps_array)
 start = time.time()
 ret = run_numba(steps_array)
