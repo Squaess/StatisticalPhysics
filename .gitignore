@@ -3,3 +3,4 @@
 .vs
 *.obj
 *.exe
+.DS_Store
