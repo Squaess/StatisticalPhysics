@@ -1,15 +1,16 @@
       implicit none
       REAL :: random
-      integer, parameter :: L=5            ! size of lattice
-      integer, parameter :: S=1             ! number of realization
-      integer :: K=2                        ! steps
-      integer, parameter ::N=10            ! particles
+      integer, parameter :: L=20            ! size of lattice
+      integer, parameter :: S=10            ! number of realization
+      integer :: K, MCS=50                ! steps
+      integer, parameter ::N=400            ! particles
       integer, dimension(L) :: IN, IP       ! next and previous index 
       logical, dimension(L,L) :: A          ! if occupies?
       integer :: i,j,ii                   ! loops iterator
       integer, dimension(N) :: x, y         ! point location
       integer :: xt, yt, dxt, dyt
       integer, dimension(N) :: dx, dy
+      real :: dr=0, drS = 0
 
       ! initialization of index arrays
       do i=1,L
@@ -19,13 +20,18 @@
       IN(L) = 1
       IP(1) = L
      
-      print *, IN
-      print *,"**********************"
-      print *, IP
+      ! print *, IN
+      ! print *,"**********************"
+      ! print *, IP
       print *,(N/float(L*L))
 
+      open(unit=2, file="max1.csv")
+      write(2,*) "C ,", (N/float(L*L))
 
+      do k=1,MCS
       ! this should be for every realization 
+      drS = 0
+      do ii=1,S
       ! initialize displacement array
       do i=1,N
         dx(i) = 0
@@ -54,7 +60,9 @@
         endif
       enddo
 
-      call print2d(A, L)
+      ! call print2d(A, L)
+      ! print *, "Prticles positions beggining"
+      ! call positions(x, y, n)
 
       do i=1,K                              ! for every step
           do j=1,N                          ! for every particle
@@ -87,6 +95,32 @@
               endif
           enddo
       enddo
+
+      dr = 0
+      do i=1,n
+        dr = dr + dx(i)**2 + dy(i)**2
+      enddo
+      ! average for 1 simulation for N particles
+      dr = dr/float(n)
+      drS = drS + dr
+      ! print *, dr
+
+      ! end loop for many simluations
+      enddo
+      !average drS for simulations
+      drS = drS/float(S)
+      ! print *, K,drS/(4 * K)
+      ! write(2,*) K,",",drS/(4 * K)
+      
+
+      enddo
+      print *, K,drS/(4 * K)
+      close(2)
+      ! print *, "Perticle positions after K steps"
+      ! call positions(x, y, n)
+      ! ! displacement after K steps for N particles
+      ! print *, "Displaycment"
+      ! call positions(dx, dy, N)
       end
 
       subroutine positions(x, y, n)
