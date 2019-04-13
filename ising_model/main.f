@@ -10,7 +10,7 @@
       integer :: i, j, k
       real :: T = 0
       ! number of temperature points
-      integer, parameter :: nt = 1000
+      integer, parameter :: nt = 300
       real, dimension(nt) :: TA
       ! average magnetization
       real :: ma = 0
@@ -32,11 +32,11 @@
 
       ! initialize temp values
       do i=1,nt
-        TA(i) = 1.5 + i*(1.8/float(nt))
+        TA(i) = 0. + i*(5./float(nt))
       enddo
 
-      open(unit=2, file='magnetization.csv')
-      write(2,*) "T, m"
+      open(unit=2, file='magnetization25.csv')
+      write(2,*) "T, m, L"
 
       do i=1,nt
         print *, i/float(nt)*100, "%"
@@ -51,7 +51,7 @@
             end if
         enddo
         ma = ma/float(maCounter)
-        write(2,*) T, ",", ma
+        write(2,*) T, ",", ma,",",L
       enddo
 
       close(2)
