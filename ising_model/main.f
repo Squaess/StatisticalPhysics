@@ -1,19 +1,20 @@
       implicit none
 
-      integer, parameter :: L = 25
+      integer, parameter :: L = 10
       ! table of nearest neighbour
       integer, dimension(L) :: IN, IP
       ! table of spins
       integer, dimension(L,L) :: S
-      integer :: MCS = 530 000
+      integer :: MCS = 11530 000
       ! iterator
       integer :: i, j, k
       real :: T = 0
       ! number of temperature points
-      integer, parameter :: nt = 300
+      integer, parameter :: nt = 1
       real, dimension(nt) :: TA
       ! average magnetization
       real :: ma = 0
+      real :: m = 0
       integer :: maCounter = 0
 
       ! initialize PBC
@@ -34,9 +35,10 @@
       do i=1,nt
         TA(i) = 0. + i*(5./float(nt))
       enddo
+      TA(1) = 1.8
 
-      open(unit=2, file='magnetization25.csv')
-      write(2,*) "T, m, L"
+      open(unit=2, file='flips.csv')
+      write(2,*) "MCS, m"
 
       do i=1,nt
         print *, i/float(nt)*100, "%"
@@ -46,20 +48,22 @@
         do k=1,MCS
             call mcstep(T)
             if (k .gt. 30 000 .AND. mod(k,100) .eq. 0) then
-                call calc_ma(ma)
+                m = 0
+                call calc_ma(ma, m)
                 maCounter = maCounter + 1
+                write(2,*) k, ",", m
             end if
         enddo
         ma = ma/float(maCounter)
-        write(2,*) T, ",", ma,",",L
+        ! write(2,*) T, ",", ma,",",L
       enddo
 
       close(2)
 
       contains
-        subroutine calc_ma(ma)
+        subroutine calc_ma(ma, m)
             real, intent(inout) :: ma
-            real :: m
+            real, intent(inout):: m
             integer :: i, j
             m = 0
             do i=1,L
