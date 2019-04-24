@@ -2,28 +2,28 @@
 
       integer, parameter :: L = 10
       ! table of nearest neighbour
-      integer, dimension(L) :: IN, IP
+      integer, dimension(L) :: NI, PI
       ! table of spins
       integer, dimension(L,L) :: S
-      integer :: MCS = 70 530 000
+      integer :: MCS = 10 530 000
       ! iterator
       integer :: i, j, k
-      real :: T = 0
+      real :: T = 1.7
       ! number of temperature points
-      integer, parameter :: nt = 1
-      real, dimension(nt) :: TA
+      ! integer, parameter :: nt = 1
+      ! real, dimension(nt) :: TA
       ! average magnetization
       real :: ma = 0
-      real :: m = 0
+      ! real :: m = 0
       integer :: maCounter = 0
 
       ! initialize PBC
       do i=1,L
-        IN(i) = i+1
-        IP(i) = i-1
+        NI(i) = i+1
+        PI(i) = i-1
       enddo
-      IN(L) = 1
-      IP(1) = L
+      NI(L) = 1
+      PI(1) = L
 
       do i=1,L
         do j=1,L
@@ -32,40 +32,39 @@
       enddo
 
       ! initialize temp values
-      do i=1,nt
-        TA(i) = 1.2 + i*(3.0/float(nt))
-      enddo
-      TA(1) = 1.7
+    !   do i=1,nt
+    !     TA(i) = 1.2 + i*(3.0/float(nt))
+    !   enddo
 
       open(unit=2, file='tmp2.csv')
       ! write(2,*) "T, m, L"
       write(2,*) "MCS, m"
 
-      do i=1,nt
-        print *, i/float(nt)*100, "%"
-        T = TA(i)
-        T = TA(1)
+    !   do i=1,nt
+        ! print *, i/float(nt)*100, "%"
+        ! T = TA(i)
+        ! T = TA(1)
         ! ma = 0.
         maCounter = 0
         do k=1,MCS
             call mcstep(T)
             if (k .gt. 30 000 .AND. mod(k,100) .eq. 0) then
-                m = 0
-                call calc_ma(ma, m)
-                maCounter = maCounter + 1
-                write(2,*) k, ",", m
+                ! call calc_ma(ma)
+                ! maCounter = maCounter + 1
+                ! print *, k, ",", calc_m()
+                write(2,*) k, ",", calc_m()
             end if
         enddo
         ma = ma/float(maCounter)
         ! write(2,*) T, ",", ma,",",L
-      enddo
+    !   enddo
 
       close(2)
 
       contains
-        subroutine calc_ma(ma, m)
+        subroutine calc_ma(ma)
             real, intent(inout) :: ma
-            real, intent(inout) :: m
+            real :: m = 0
             integer :: i, j
             m = 0
             do i=1,L
@@ -77,12 +76,24 @@
             ma = ma + abs(m)
         end subroutine calc_ma
 
+        function calc_m() result(m)
+            real :: m
+            integer :: i, j
+            m = 0
+            do i=1,L
+                do j=1,L
+                    m = m + S(i,j)
+                enddo
+            enddo
+            m = m/(L*L)
+        end function calc_m
+
         subroutine trial(i,j,t)
             integer, intent(in) :: i, j
             real, intent(in) :: t
             integer :: dU, suma
             real :: r
-            suma = S(IN(i),j) + S(IP(i), j) + S(i, IN(j)) + S(i, IP(j))
+            suma = S(NI(i),j) + S(PI(i), j) + S(i, NI(j)) + S(i, PI(j))
             du = 2 * S(i,j) * suma
             if (du .lt. 0) then
                 S(i,j) = S(i,j) * (-1)
