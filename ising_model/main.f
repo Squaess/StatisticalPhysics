@@ -5,7 +5,7 @@
       integer, dimension(L) :: IN, IP
       ! table of spins
       integer, dimension(L,L) :: S
-      integer :: MCS = 11530 000
+      integer :: MCS = 70 530 000
       ! iterator
       integer :: i, j, k
       real :: T = 0
@@ -33,17 +33,19 @@
 
       ! initialize temp values
       do i=1,nt
-        TA(i) = 0. + i*(5./float(nt))
+        TA(i) = 1.2 + i*(3.0/float(nt))
       enddo
-      TA(1) = 1.8
+      TA(1) = 1.7
 
-      open(unit=2, file='flips.csv')
+      open(unit=2, file='tmp2.csv')
+      ! write(2,*) "T, m, L"
       write(2,*) "MCS, m"
 
       do i=1,nt
         print *, i/float(nt)*100, "%"
         T = TA(i)
-        ma = 0.
+        T = TA(1)
+        ! ma = 0.
         maCounter = 0
         do k=1,MCS
             call mcstep(T)
@@ -63,7 +65,7 @@
       contains
         subroutine calc_ma(ma, m)
             real, intent(inout) :: ma
-            real, intent(inout):: m
+            real, intent(inout) :: m
             integer :: i, j
             m = 0
             do i=1,L
