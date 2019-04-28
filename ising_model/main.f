@@ -5,13 +5,13 @@
       integer, dimension(L) :: NI, PI
       ! table of spins
       integer, dimension(L,L) :: S
-      integer :: MCS = 10 530 000
+      integer :: MCS = 530 000
       ! iterator
       integer :: i, j, k
       real :: T = 1.7
       ! number of temperature points
-      ! integer, parameter :: nt = 1
-      ! real, dimension(nt) :: TA
+      integer, parameter :: nt = 100
+       real, dimension(nt) :: TA
       ! average magnetization
       real :: ma = 0
       ! real :: m = 0
@@ -32,32 +32,32 @@
       enddo
 
       ! initialize temp values
-    !   do i=1,nt
-    !     TA(i) = 1.2 + i*(3.0/float(nt))
-    !   enddo
+      do i=1,nt
+        TA(i) = 1.2 + i*(3.0/float(nt))
+      enddo
 
-      open(unit=2, file='tmp2.csv')
-      ! write(2,*) "T, m, L"
-      write(2,*) "MCS, m"
+      open(unit=2, file='mag10.csv')
+      write(2,*) "T, m, L"
+      ! write(2,*) "MCS, m"
 
-    !   do i=1,nt
-        ! print *, i/float(nt)*100, "%"
-        ! T = TA(i)
+      do i=1,nt
+        print *, i/float(nt)*100, "%"
+        T = TA(i)
         ! T = TA(1)
-        ! ma = 0.
+        ma = 0.
         maCounter = 0
         do k=1,MCS
             call mcstep(T)
             if (k .gt. 30 000 .AND. mod(k,100) .eq. 0) then
-                ! call calc_ma(ma)
-                ! maCounter = maCounter + 1
+                call calc_ma(ma)
+                maCounter = maCounter + 1
                 ! print *, k, ",", calc_m()
-                write(2,*) k, ",", calc_m()
+                ! write(2,*) k, ",", calc_m()
             end if
         enddo
         ma = ma/float(maCounter)
-        ! write(2,*) T, ",", ma,",",L
-    !   enddo
+        write(2,*) T, ",", ma,",",L
+      enddo
 
       close(2)
 
