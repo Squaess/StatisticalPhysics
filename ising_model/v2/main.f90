@@ -1,6 +1,6 @@
       PROGRAM ising
         IMPLICIT NONE
-        integer, parameter :: L = 10
+        integer, parameter :: L = 50
         integer, dimension(L,L) :: S
         integer, dimension(L) :: NI, PI
         integer :: k = 530000
@@ -8,7 +8,9 @@
         real, dimension(-8:8) :: Tex
         real, dimension(50) :: Ta
         real :: ma, ea, avgm, avgm2
-        real :: sus, ea2, heatc
+        real :: sus, avge, avge2, heatc
+        real :: bind_m4, bind_m2
+        real :: bind
 
         integer :: i, j, counter
 
@@ -19,14 +21,16 @@
         NI(L)=1 
         PI(1)=L
 
-        call init_Ta_reg(Ta)
+        call init_Ta_bind(Ta)
 
         call initS(S, L)
 
-        open(unit=2, file="sus10.csv")
-        write(2, *) "T,m,L"
-        open(unit=3, file="heat10.csv")
-        write(3, *) "T,e,L"
+        ! open(unit=2, file="sus100.csv")
+        ! write(2, *) "T,m,L"
+        ! open(unit=3, file="heat100.csv")
+        ! write(3, *) "T,e,L"
+        open(unit=4, file="binder50.csv")
+        write(4, *) "T,b,L"
 
         do j=1,50
         print *, 2*j, "%"
@@ -35,10 +39,13 @@
         call initTex(tex,T)
         ma = 0
         ea = 0
-        ea2 = 0
+        avge = 0
+        avge2 = 0
         avgm = 0
         avgm2 = 0
         counter = 0
+        bind_m4 = 0
+        bind_m2 = 0
         do i=1,k
             call mcs(t)
             if ((i >= 30000) .and. (mod(i,100) == 0)) then 
@@ -47,24 +54,33 @@
                 avgm2 = avgm2 + (calc_m()**2)
                 ma = ma + abs(calc_m())
                 ea = ea + calc_ener()
-                ea2 = ea2 + (calc_ener()**2)
+                avge = avge + calc_ener2()
+                avge2 = avge2 + (calc_ener2()**2)
+                bind_m4 = bind_m4 + (calc_m2()**4)
+                bind_m2 = bind_m2 + (calc_m2()**2)
                 counter = counter + 1
             end if
         enddo
         ma = ma/float(counter)
         ! write(2, *) T, ",", ma, ",", L
         ea = ea/float(counter)
-        ea2 = ea2/float(counter)
+        avge = avge/float(counter)
+        avge2 = avge2/float(counter)
         avgm = avgm/float(counter)
         avgm2 = avgm2/float(counter)
+        bind_m4 = bind_m4/float(counter)
+        bind_m2 = bind_m2/float(counter)
         sus = ((L*L)/T)*(avgm2 - (avgm**2))
-        heatc = (1/((L*L)*(T**2)))*(ea2 - (ea**2))
+        heatc = (1/(float(L**2)*(T**2)))*(avge2 - (avge**2))
+        bind = 1 - (bind_m4/(3* (bind_m2**2)))
         ! write(3, *) T, ",", ea, ",", L
-        write(2, *) T, ",", sus, ",", L
-        write(3, *) T, ",", heatc, ",", L
+        ! write(2, *) T, ",", sus, ",", L
+        ! write(3, *) T, ",", heatc, ",", L
+        write(4, *) T, ",", bind, ",", L
         enddo
-        close(2)
+        ! close(2)
         close(3)
+        close(4)
 
         contains
             function calc_m() result(m)
@@ -78,6 +94,17 @@
                 enddo
                 m = m/(L*L)
             end function calc_m
+
+            function calc_m2() result(m)
+                real :: m
+                integer :: i,j
+                m = 0
+                do i=1,L
+                    do j=1,L
+                        m = m + S(i,j)
+                    enddo
+                enddo
+            end function calc_m2
 
             function calc_ener() result(en)
                 real :: en
@@ -94,6 +121,22 @@
                 enddo
                 en = en/((L*L)*2.0)
             end function calc_ener
+
+            function calc_ener2() result(en)
+                real :: en
+                integer :: i, j, su
+                en = 0
+                do i=1,L
+                    do j=1,L
+                        su = S(NI(i), j) + &
+                            S(PI(i), j) + &
+                            S(i, NI(j))+ &
+                            S(i, PI(j))
+                        en = en + ((-su) * S(i,j))
+                    enddo
+                enddo
+                en = en/(2.0)
+            end function calc_ener2
 
             function calc_du(x, y) result(du)
                 integer :: du
@@ -225,3 +268,10 @@
         enddo
       end subroutine init_Ta_reg
 
+      subroutine init_Ta_bind(ta)
+        real, intent(inout), dimension(50) :: ta
+        integer :: i
+        do i=1,50
+            ta(i) = 1.8 + i * ((2.5-1.8)/50)
+        enddo
+      end subroutine init_Ta_bind
