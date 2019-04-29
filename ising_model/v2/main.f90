@@ -1,11 +1,16 @@
       PROGRAM ising
         IMPLICIT NONE
-        integer, parameter :: L = 50
+        integer, parameter :: L = 10
         integer, dimension(L,L) :: S
+        ! PBC
         integer, dimension(L) :: NI, PI
+        ! number of MCS
         integer :: k = 530000
         real :: T = 0
+        ! array to store prob acceptance for
+        ! given T
         real, dimension(-8:8) :: Tex
+        ! T sampling
         real, dimension(50) :: Ta
         real :: ma, ea, avgm, avgm2
         real :: sus, avge, avge2, heatc
@@ -21,7 +26,7 @@
         NI(L)=1 
         PI(1)=L
 
-        call init_Ta_bind(Ta)
+        call init_Ta_reg(Ta)
 
         call initS(S, L)
 
@@ -29,8 +34,8 @@
         ! write(2, *) "T,m,L"
         ! open(unit=3, file="heat100.csv")
         ! write(3, *) "T,e,L"
-        open(unit=4, file="binder50.csv")
-        write(4, *) "T,b,L"
+        open(unit=4, file="finite10.csv")
+        write(4, *) "T,m,L"
 
         do j=1,50
         print *, 2*j, "%"
@@ -62,7 +67,6 @@
             end if
         enddo
         ma = ma/float(counter)
-        ! write(2, *) T, ",", ma, ",", L
         ea = ea/float(counter)
         avge = avge/float(counter)
         avge2 = avge2/float(counter)
@@ -76,10 +80,11 @@
         ! write(3, *) T, ",", ea, ",", L
         ! write(2, *) T, ",", sus, ",", L
         ! write(3, *) T, ",", heatc, ",", L
-        write(4, *) T, ",", bind, ",", L
+        ! write(4, *) T, ",", bind, ",", L
+        write(4, *) T, ",", ma, ",", L
         enddo
         ! close(2)
-        close(3)
+        ! close(3)
         close(4)
 
         contains
@@ -275,3 +280,11 @@
             ta(i) = 1.8 + i * ((2.5-1.8)/50)
         enddo
       end subroutine init_Ta_bind
+
+      subroutine init_Ta_flip(ta)
+        real, intent(inout), dimension(50) :: ta
+        integer :: i
+        do i=1,50
+            ta(i) = 1.8 + i * ((2.5-1.8)/50)
+        enddo
+      end subroutine init_Ta_flip
