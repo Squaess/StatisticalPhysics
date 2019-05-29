@@ -9,9 +9,6 @@
         real P2(-180:180)
         integer :: i, counter
         real :: T
-        REAL :: A( 2, 2 ), W( 2 ), WORK( 1000 )
-        INTEGER :: INFO, LWORK, LIWORK
-        INTEGER :: IWORK( 1000 )
 
         Q(1,1) = 0
         Q(1,2) = 0
@@ -48,16 +45,31 @@
 
         print *, fi
         print *, "DUpa"
-
         print *,Q
-
-        CALL SSYEVD( 'Vectors', 'Upper', 2, Q, 2, W, WORK, -1, &
-               IWORK, -1, INFO )
-        LWORK = MIN( LWMAX, INT( WORK( 1 ) ) )
-        print *, INFO
-
+        call calc_eigen()
 
         contains
+
+            subroutine calc_eigen()
+                !     .. Parameters ..
+                INTEGER          N
+                PARAMETER        ( N = 2 )
+                INTEGER          LDA, LDVL, LDVR
+                PARAMETER        ( LDA = N, LDVL = N, LDVR = N )
+                INTEGER          LWMAX
+                PARAMETER        ( LWMAX = 1000 )
+                ! 
+                INTEGER          INFO, LWORK
+                !
+                REAL             VL( LDVL, N ), VR( LDVR, N )
+                REAL             WR( N ), WI( N ), WORK( LWMAX )
+                LWORK = -1
+                CALL SGEEV( 'Vectors', 'Vectors', N, Q, LDA, WR, WI, VL, LDVL, &
+                    VR, LDVR, WORK, LWORK, INFO )
+                print *, INFO
+                print *, WR, WI
+                print *, MAX(WR, WI)
+            end subroutine calc_eigen
 
             subroutine calc_q()
                 integer :: i,j
