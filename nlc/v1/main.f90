@@ -1,19 +1,17 @@
       PROGRAM main
         IMPLICIT NONE
         real, parameter :: PI_math = 4 * atan(1.0)
-        integer, parameter :: L = 3
+        integer, parameter :: L = 10
         integer, dimension(L) :: NI, PI
         integer, dimension(L,L) :: fi
         real, dimension(2,2) :: Q
-        integer :: k = 1230000
+        integer :: k = 230000
         real P2(-180:180)
-        integer :: i, counter
-        real :: T
+        integer :: i, counter, j
+        real :: T, eig
+        real, dimension(100) :: TA
 
-        Q(1,1) = 0
-        Q(1,2) = 0
-        Q(2,1) = 0
-        Q(2,2) = 0
+        call init_ta()
 
         do i=1,L
             NI(I) = I+1
@@ -26,15 +24,25 @@
             P2(i) = 0.5 * (3 * cos(i*PI_math/180.0)**2 - 1.0)
         enddo
 
-        call init_fi()
-        call mcs()
+        open(unit=2, file='result.csv')
+        write(2, *) "T, e"
+        ! start loop for every temp
+        do j=1,100
 
-        T = 0.1
+        T = TA(j)
+
+        Q(1,1) = 0
+        Q(1,2) = 0
+        Q(2,1) = 0
+        Q(2,2) = 0
+
+        call init_fi()
 
         counter = 0
+        ! start loop for k MCS steps
         do i=1,k
-            call mcs()
-            if ((i >= 30000) .and. (mod(i,100) == 0)) then
+            call mcs(T)
+            if ((i >= 30000) .and. (mod(i,1000) == 0)) then
                 call calc_q()
                 counter = counter + 1
             endif
@@ -43,14 +51,26 @@
         Q(2,1) = Q(1,2)
         Q(2,2) = - Q(1,1)
 
-        print *, fi
-        print *, "DUpa"
-        print *,Q
-        call calc_eigen()
+        ! print *, fi
+        ! print *, Q(1,1), Q(1,2)
+        ! print *, Q(2,1), Q(2,2)
+        eig = calc_eigen()/float(counter)
+        write(2,*) T, "," , eig
+        print *, j, "%"
+        enddo
+        ! end of loop for temp
+        close(2)
 
         contains
 
-            subroutine calc_eigen()
+            subroutine init_ta
+                integer :: i
+                do i=1,100
+                    TA(I) = 0.1 + I*((3.7-0.1)/100.)
+                enddo
+            end subroutine init_ta
+
+            function calc_eigen() result(eigen)
                 !     .. Parameters ..
                 INTEGER          N
                 PARAMETER        ( N = 2 )
@@ -63,13 +83,20 @@
                 !
                 REAL             VL( LDVL, N ), VR( LDVR, N )
                 REAL             WR( N ), WI( N ), WORK( LWMAX )
+                REAL eigen
                 LWORK = -1
                 CALL SGEEV( 'Vectors', 'Vectors', N, Q, LDA, WR, WI, VL, LDVL, &
                     VR, LDVR, WORK, LWORK, INFO )
-                print *, INFO
-                print *, WR, WI
-                print *, MAX(WR, WI)
-            end subroutine calc_eigen
+                LWORK = MIN( LWMAX, INT( WORK( 1 ) ) )
+                CALL SGEEV( 'Vectors', 'Vectors', N, Q, LDA, WR, WI, VL, LDVL, &
+                    VR, LDVR, WORK, LWORK, INFO )
+
+                ! print *, INFO
+                ! print *, WR
+                ! print *, WI
+                ! print *, MAX(WR(1), WR(2))
+                eigen = MAX(WR(1), WR(2))
+            end function calc_eigen
 
             subroutine calc_q()
                 integer :: i,j
@@ -94,11 +121,15 @@
                 enddo
             end subroutine init_fi
 
-            subroutine mcs()
+            subroutine mcs(T)
+                real :: T
                 integer :: i, j
+                real :: pi, pj
                 do i=1,L
                     do j=1,L
-                        call trial(i,j, 0.5)
+                        call random_number(pi)
+                        call random_number(pj)
+                        call trial(int(pi * L) + 1, int(pj * L) + 1, T)
                     enddo
                 enddo
             end subroutine mcs
@@ -122,8 +153,12 @@
                 diff = calc_diff_ene(i,j,fi_new)
                 if (diff .gt. 0) then
                     fi(i,j) = fi_new
+                    ! print *, "changing due to diff energy"
                 else if (p .lt. exp(diff/T)) then
                     fi(i,j) = fi_new
+                    ! print *, "changing due to exp"
+                else
+                    ! print *, "Not changing"
                 endif
 
             end subroutine trial
