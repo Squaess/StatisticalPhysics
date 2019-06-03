@@ -23,7 +23,7 @@ call init_P2()
 call init_eigens()
 
 ! start loop for different temperatures
-open(unit=2, file="result.csv")
+open(unit=2, file="result2.csv")
 write(2, *) "T,S, S2"
 
 do i=1,size(TA)
@@ -45,15 +45,10 @@ do i=1,size(TA)
             c = c + 1
         endif
     enddo
-    ! Q(1,1) = Q(1,1) / float(c)
-    ! Q(1,2) = Q(1,2) / float(c)
     Q(2,1) = Q(1,2)
     Q(2,2) = -Q(1,1)
     print *, "Completed: ", int(i/float(size(TA))*100), "%"
-    ! print *, c, "states where computed"
-    ! eig = calc_eigen()
     eig = calc_eigen() / float(c)
-    ! print *, "Temperature: ", T, "max_eigen: ", eig
     write(2, *) T, ",", eig, ",", eigens(i)/float(c)
 
 enddo
