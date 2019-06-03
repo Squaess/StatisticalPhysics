@@ -5,12 +5,12 @@ real, parameter :: PI_MATH = 4 * atan(1.0)
 integer, parameter :: L = 20
 integer, dimension(L,L) :: fi
 ! number of monte carlo steps
-integer :: k = 230000
+integer :: k = 530000
 ! PBC
 integer, dimension(L) :: NI, PI
 ! array of temperatures
-real, dimension(50) :: TA
-real, dimension(50) :: eigens
+real, dimension(100) :: TA
+real, dimension(100) :: eigens
 real :: T, eig
 real P2(-180:180)
 real, dimension(2,2) :: Q
@@ -80,10 +80,14 @@ end subroutine init_PBC
 
 subroutine init_TA()
     integer :: i
-    real :: T_LOW = 0
-    real :: T_MAX = 1.5
-    do i=1, size(TA)
-        TA(i) = T_LOW + i*(T_MAX-T_LOW)/float(size(TA))
+    do i=1,40
+        TA(i) = 0.0 + i*(0.7)/float(40)
+    enddo
+    do i=1,20
+        TA(i+40) = 0.7 + i*(0.9-0.7)/float(20)
+    enddo
+    do i=1,40
+        TA(i+60) = 0.9 + i*(1.5-0.9)/float(40)
     enddo
 end subroutine init_TA
 
