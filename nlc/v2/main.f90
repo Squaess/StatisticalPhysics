@@ -5,12 +5,12 @@ real, parameter :: PI_MATH = 4 * atan(1.0)
 integer, parameter :: L = 20
 integer, dimension(L,L) :: fi
 ! number of monte carlo steps
-integer :: k = 530000
+integer :: k = 1230000
 ! PBC
 integer, dimension(L) :: NI, PI
 ! array of temperatures
-real, dimension(100) :: TA
-real, dimension(100) :: eigens
+real, dimension(12) :: TA
+real, dimension(12) :: eigens
 real :: T, eig
 real P2(-180:180)
 real, dimension(2,2) :: Q
@@ -75,14 +75,17 @@ end subroutine init_PBC
 
 subroutine init_TA()
     integer :: i
-    do i=1,40
-        TA(i) = 0.0 + i*(0.7)/float(40)
-    enddo
-    do i=1,20
-        TA(i+40) = 0.7 + i*(0.9-0.7)/float(20)
-    enddo
-    do i=1,40
-        TA(i+60) = 0.9 + i*(1.5-0.9)/float(40)
+    ! do i=1,40
+    !     TA(i) = 0.0 + i*(0.7)/float(40)
+    ! enddo
+    ! do i=1,20
+    !     TA(i+40) = 0.7 + i*(0.9-0.7)/float(20)
+    ! enddo
+    ! do i=1,40
+    !     TA(i+60) = 0.9 + i*(1.5-0.9)/float(40)
+    ! enddo
+    do i=1,12
+        TA(i) = 0.0 + i*(1.5)/float(12)
     enddo
 end subroutine init_TA
 
@@ -98,9 +101,13 @@ end subroutine init_fi
 subroutine mcs(T)
     real, intent(in) :: T
     integer :: i,j
+    real :: pi, pj
     do i=1,L
         do j=1,L
-            call trial(i,j,T)
+            call random_number(pi)
+            call random_number(pj)
+            ! call trial(i,j,T)
+            call trial(int(pi*L)+1,int(pj*L)+1,T)
         enddo
     enddo
 end subroutine mcs
