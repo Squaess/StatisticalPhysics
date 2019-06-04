@@ -5,12 +5,12 @@ real, parameter :: PI_MATH = 4 * atan(1.0)
 integer, parameter :: L = 20
 integer, dimension(L,L) :: fi
 ! number of monte carlo steps
-integer :: k = 1230000
+integer :: k = 150000
 ! PBC
 integer, dimension(L) :: NI, PI
 ! array of temperatures
-real, dimension(12) :: TA
-real, dimension(12) :: eigens
+real, dimension(50) :: TA
+real, dimension(50) :: eigens
 real :: T, eig
 real P2(-180:180)
 real, dimension(2,2) :: Q
@@ -23,7 +23,7 @@ call init_P2()
 call init_eigens()
 
 ! start loop for different temperatures
-open(unit=2, file="result2.csv")
+open(unit=2, file="result3.csv")
 write(2, *) "T,S, S2"
 
 do i=1,size(TA)
@@ -37,7 +37,7 @@ do i=1,size(TA)
     T = TA(i)
     do j=1,k
         call mcs(T)
-        if ((j > 30000) .and. (MOD(j,100) .eq. 0)) then
+        if ((j > 5000) .and. (MOD(j,100) .eq. 0)) then
             call update_q()
             Q(2,1) = Q(1,2)
             Q(2,2) = -Q(1,1)
@@ -84,8 +84,14 @@ subroutine init_TA()
     ! do i=1,40
     !     TA(i+60) = 0.9 + i*(1.5-0.9)/float(40)
     ! enddo
-    do i=1,12
-        TA(i) = 0.0 + i*(1.5)/float(12)
+    do i=1,15
+        TA(i) = 0.0 + i*(0.7)/float(15)
+    enddo
+    do i=1,15
+        TA(i+15) = 0.7 + i*(1.-0.7)/float(15)
+    enddo
+    do i=1,15
+        TA(i+30) = 1 + i*(1.5-1.0)/float(15)
     enddo
 end subroutine init_TA
 
