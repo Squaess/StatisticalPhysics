@@ -2,10 +2,10 @@ program name
 implicit none
 real, parameter :: PI_MATH = 4 * atan(1.0)
 ! lettice size
-integer, parameter :: L = 20
+integer, parameter :: L = 100
 integer, dimension(L,L) :: fi
 ! number of monte carlo steps
-integer :: k = 150000
+integer :: k = 50000
 ! PBC
 integer, dimension(L) :: NI, PI
 ! array of temperatures
@@ -85,10 +85,10 @@ subroutine init_TA()
     !     TA(i+60) = 0.9 + i*(1.5-0.9)/float(40)
     ! enddo
     do i=1,15
-        TA(i) = 0.0 + i*(0.7)/float(15)
+        TA(i) = 0.0 + i*(0.75)/float(15)
     enddo
-    do i=1,15
-        TA(i+15) = 0.7 + i*(1.-0.7)/float(15)
+    do i=1,20
+        TA(i+15) = 0.75 + i*(1.-0.75)/float(20)
     enddo
     do i=1,15
         TA(i+30) = 1 + i*(1.5-1.0)/float(15)
